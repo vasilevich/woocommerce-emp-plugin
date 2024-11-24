@@ -55,7 +55,15 @@ class WC_Emerchantpay_Checkout extends WC_Emerchantpay_Method_Base {
 	 * Additional Method Setting Keys
 	 */
 	const SETTING_KEY_TRANSACTION_TYPES        = 'transaction_types';
-	const SETTING_KEY_CHECKOUT_LANGUAGE        = 'checkout_language';
+
+    /**
+     * Setting key for enabling/disabling the option to select only one payment method in the iframe
+     */
+    const SETTING_KEY_TRANSACTION_TYPES_ENABLE_SELECT_ONLY_ONE  = 'transaction_types_enable_select_only_one';
+    const SETTING_KEY_TRANSACTION_TYPES_TO_LABEL                = 'transaction_types_to_label';
+
+
+    const SETTING_KEY_CHECKOUT_LANGUAGE        = 'checkout_language';
 	const SETTING_KEY_INIT_RECURRING_TXN_TYPES = 'init_recurring_txn_types';
 	const SETTING_KEY_TOKENIZATION             = 'tokenization';
 	const SETTING_KEY_BANK_CODES               = 'bank_codes';
@@ -131,6 +139,14 @@ class WC_Emerchantpay_Checkout extends WC_Emerchantpay_Method_Base {
 	public function is_iframe_enabled() {
 		return $this->get_option( self::SETTING_KEY_IFRAME_PROCESSING ) === self::SETTING_VALUE_YES;
 	}
+    /**
+     * Return if select only one payment method in the iframe is enabled
+     *
+     * @return bool
+     */
+    public function is_select_only_one_enabled() {
+        return $this->get_option( self::SETTING_KEY_TRANSACTION_TYPES_ENABLE_SELECT_ONLY_ONE) === self::SETTING_VALUE_YES;
+    }
 
 	/**
 	 * Override method to show the description instead of any fields
@@ -138,8 +154,31 @@ class WC_Emerchantpay_Checkout extends WC_Emerchantpay_Method_Base {
 	 * @return void
 	 */
 	public function payment_fields() {
-		$description = $this->get_description();
-		echo esc_html( $description );
+
+        if($this->is_select_only_one_enabled()){
+            try {
+                $transaction_types_json = $this->get_option(self::SETTING_KEY_TRANSACTION_TYPES_TO_LABEL);
+                if (empty($transaction_types_json)) {
+                    throw new Exception('Transaction types are not configured.');
+                }
+
+                $transaction_types = json_decode($transaction_types_json, true);
+                if (!is_array($transaction_types) || empty($transaction_types)) {
+                    throw new Exception('Invalid or empty transaction types data.');
+                }
+                echo '<p>Please choose how you’d like to process this payment</p>';
+                echo '<select id="'.self::SETTING_KEY_TRANSACTION_TYPES_TO_LABEL.'" name="'.self::SETTING_KEY_TRANSACTION_TYPES_TO_LABEL.'">';
+                foreach ($transaction_types as $key => $label) {
+                    echo '<option value="' . esc_attr($key) . '">' . esc_html($label) . '</option>';
+                }
+                echo '</select>';
+            } catch (Exception $e) {
+                echo '<p>' . esc_html($e->getMessage()) . '</p>';
+            }
+        } else {
+            $description = $this->get_description();
+            echo esc_html($description);
+        }
 	}
 
 	/**
@@ -222,7 +261,22 @@ class WC_Emerchantpay_Checkout extends WC_Emerchantpay_Method_Base {
 				'description' => static::get_translated_text( 'Select transaction type for the payment transaction' ),
 				'desc_tip'    => true,
 			),
-			self::SETTING_KEY_BANK_CODES          => array(
+            self::SETTING_KEY_TRANSACTION_TYPES_ENABLE_SELECT_ONLY_ONE   => array(
+                'type'        => 'checkbox',
+                'title'       => static::get_translated_text( 'Enable/Disable' ),
+                'label'       => static::get_translated_text( 'Enable customer to see select of transaction type in the checkout payment gateway line' ),
+                'default'     => self::SETTING_VALUE_NO,
+                'description' => static::get_translated_text(
+                    'Enable customer to see select of transaction type in the checkout payment gateway line'
+                ),
+            ),
+            self::SETTING_KEY_TRANSACTION_TYPES_TO_LABEL => array(
+                'type'        => 'hidden', // Let WooCommerce handle this as a hidden field
+                'title'       => static::get_translated_text('Transaction Type To Label'),
+                'description' => static::get_translated_text('What Label to show of the transaction type to the visitors in the checkout page'),
+                'desc_tip'    => true,
+            ),
+        self::SETTING_KEY_BANK_CODES          => array(
 				'type'        => 'multiselect',
 				'css'         => 'height:auto',
 				'title'       => static::get_translated_text( 'Bank code(s) for Online banking' ),
@@ -1002,6 +1056,11 @@ class WC_Emerchantpay_Checkout extends WC_Emerchantpay_Method_Base {
 				$processed_list[] = $selected_type;
 			}
 		}
+
+        if($this->is_select_only_one_enabled()){
+            $transactionType = $_POST[self::SETTING_KEY_TRANSACTION_TYPES_TO_LABEL];
+            $processed_list = array($transactionType);
+        }
 
 		return $processed_list;
 	}

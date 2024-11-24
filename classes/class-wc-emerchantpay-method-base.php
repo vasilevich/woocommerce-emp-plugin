@@ -120,7 +120,6 @@ abstract class WC_Emerchantpay_Method_Base extends WC_Payment_Gateway_CC {
 	const SETTING_KEY_SCA_EXEMPTION_AMOUNT                = 'sca_exemption_amount';
 	const SETTING_KEY_IFRAME_PROCESSING                   = 'iframe_processing';
 	const SETTING_KEY_CUSTOM_THANKYOU_URL                 = 'custom_thankyou_url';
-
 	/**
 	 * Order cancel/failure settings
 	 */
@@ -383,6 +382,29 @@ abstract class WC_Emerchantpay_Method_Base extends WC_Payment_Gateway_CC {
 			$version,
 			true
 		);
+
+        wp_enqueue_script(
+            'custom-attributes',
+            plugins_url(
+                'assets/javascript/payment_settings_custom_attributes.js',
+                plugin_dir_path( __FILE__ )
+            ),
+            array(),
+            $version,
+            true
+        );
+
+        wp_enqueue_style(
+            'transaction-labels-style',
+            plugins_url(
+                'assets/css/payment_settings_custom_attributes.css',
+                plugin_dir_path( __FILE__ )
+            ),
+            array(),
+            '1.0.0'
+        );
+
+
 	}
 
 	/**

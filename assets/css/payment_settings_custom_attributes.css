@@ -1,0 +1,59 @@
+/* Container styles */
+#transaction-labels-container {
+	margin-top: 20px;
+	border: 1px solid #ddd;
+	border-radius: 5px;
+	padding: 10px;
+	background-color: #f9f9f9;
+}
+
+/* Table header */
+#transaction-labels-container::before {
+	content: "Value | Displayed Label to the User";
+	display: block;
+	font-weight: bold;
+	margin-bottom: 10px;
+	text-align: left;
+	padding-bottom: 5px;
+	border-bottom: 1px solid #ddd;
+	font-size: 14px;
+	color: #333;
+}
+
+/* Row styles */
+.transaction-label-row {
+	display: flex;
+	align-items: center;
+	margin-bottom: 10px;
+	padding: 5px 0;
+	border-bottom: 1px dashed #ddd;
+}
+
+.transaction-label-row:last-child {
+	border-bottom: none; /* Remove bottom border from the last row */
+}
+
+/* Key styles (value column) */
+.transaction-label-key {
+	flex: 1; /* Take up equal space */
+	font-weight: bold;
+	font-size: 14px;
+	color: #555;
+	margin-right: 10px;
+}
+
+/* Input styles (label column) */
+.transaction-label-input {
+	flex: 2; /* Take up more space for the input */
+	padding: 5px;
+	font-size: 14px;
+	border: 1px solid #ccc;
+	border-radius: 3px;
+	width: 100%; /* Ensure full-width for cleaner alignment */
+	box-sizing: border-box; /* Include padding and border in width calculation */
+}
+
+/* Hover effect on row */
+.transaction-label-row:hover {
+	background-color: #f0f8ff; /* Light highlight on hover */
+}
