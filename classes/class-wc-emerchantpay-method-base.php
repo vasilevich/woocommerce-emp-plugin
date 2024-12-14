@@ -390,7 +390,7 @@ abstract class WC_Emerchantpay_Method_Base extends WC_Payment_Gateway_CC {
                 plugin_dir_path( __FILE__ )
             ),
             array(),
-            $version,
+            time(),
             true
         );
 
@@ -401,7 +401,7 @@ abstract class WC_Emerchantpay_Method_Base extends WC_Payment_Gateway_CC {
                 plugin_dir_path( __FILE__ )
             ),
             array(),
-            '1.0.0'
+            time()
         );
 
 
